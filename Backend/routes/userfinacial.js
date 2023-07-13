@@ -7,15 +7,22 @@ Router.post("/invoices", async (req, res) => {
   if (invoiceDate) {
     invoiceDate = new Date(invoiceDate);
   }
-
+  let startingFinancialyearDate = new Date(`${invoiceDate.getFullYear()}-1-1`);
+  let endingFinancialyearDate = new Date(`${invoiceDate.getFullYear()}-12-31`);
   try {
-    const existingInvoice = await Invoice.findOne({ invoiceNumber });
+    const existingInvoice = await Invoice.findOne({
+      invoiceNumber,
+      invoiceDate: {
+        $lt: endingFinancialyearDate,
+        $gt: startingFinancialyearDate,
+      },
+    });
     if (existingInvoice) {
       return res.status(409).json({ error: "Invoice number already exists" });
     }
 
     const previousInvoice = await Invoice.findOne({
-      invoiceDate: { $lt: invoiceDate },
+      invoiceDate: { $lt: invoiceDate, $gt: startingFinancialyearDate },
     }).sort({ invoiceDate: -1 });
     const nextInvoice = await Invoice.findOne({
       invoiceDate: { $gt: invoiceDate },

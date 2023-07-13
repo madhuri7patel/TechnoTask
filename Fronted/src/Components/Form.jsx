@@ -83,6 +83,8 @@ const Form = ({ getData, initialFormData, method = "create" }) => {
       if (data && !data.error) {
         getData();
         handleClose();
+      } else {
+        alert(`${data?.error}`);
       }
     } catch (err) {
       console.log("Error:", err);
